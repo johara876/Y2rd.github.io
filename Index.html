@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Y2rd Store - تنسيق الطلبات</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800;900&display=swap');
+        
+        :root {
+            --bg-body: #f8f9fa;
+            --bg-card: #ffffff;
+            --text-main: #000000;
+            --border-color: #e5e7eb;
+            --input-bg: #ffffff;
+            --header-bg: rgba(255, 255, 255, 0.98);
+            --primary-sage: #708090; 
+        }
+
+        .dark-mode {
+            --bg-body: #111827;
+            --bg-card: #1f2937;
+            --text-main: #ffffff;
+            --border-color: #374151;
+            --input-bg: #111827;
+            --header-bg: rgba(17, 24, 39, 0.98);
+            --primary-sage: #94a3b8;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--bg-body) !important;
+            color: var(--text-main) !important;
+            font-weight: 800;
+        }
+
+        .machine-card {
+            background: var(--bg-card) !important;
+            border-radius: 12px;
+            border: 1.5px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+
+        .product-img-container {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 8px;
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        .btn-disabled {
+            opacity: 0.3 !important;
+            pointer-events: none;
+            filter: grayscale(1);
+        }
+
+        .progress-bar {
+            height: 6px;
+            border-radius: 10px;
+            background: var(--border-color) !important;
+            overflow: hidden;
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--primary-sage);
+            width: 0%;
+            transition: width 0.4s ease;
+        }
+
+        .compact-input {
+            height: 38px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 11px;
+            background: var(--input-bg) !important;
+            color: var(--text-main) !important;
+            outline: none;
+            font-weight: 900;
+        }
+
+        .machines-slider {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px;
+            scrollbar-width: none;
+            background: var(--header-bg);
+        }
+
+        .machines-slider::-webkit-scrollbar {
+            display: none;
+        }
+
+        .machine-filter-btn {
+            flex: 0 0 auto;
+            padding: 5px 14px;
+            background: var(--border-color);
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .machine-filter-btn.active {
+            background: var(--primary-sage);
+            color: white;
+        }
+
+        header, footer {
+            background-color: var(--header-bg) !important;
+            backdrop-filter: blur(10px);
+        }
+
+        .ui-hide-content { display: none !important; }
+        .row-hidden { display: none !important; }
+
+        #toggle-ui-btn {
+            position: fixed;
+            left: 20px;
+            bottom: 155px;
+            z-index: 250;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--primary-sage);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .qty-step-control {
+            display: flex;
+            align-items: center;
+            background: var(--input-bg);
+            border: 1.5px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            height: 38px;
+        }
+
+        .qty-step-btn {
+            width: 24px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            background: var(--border-color);
+            transition: opacity 0.2s;
+        }
+
+        .qty-step-btn:active { opacity: 0.5; }
+
+        .qty-step-select {
+            flex: 1;
+            border: none !important;
+            background: transparent !important;
+            text-align: center;
+            font-size: 10px;
+            width: 100%;
+            appearance: none;
+            padding: 0 4px;
+        }
+    </style>
+</head>
+<body class="pb-48">
+
+    <button id="toggle-ui-btn" onclick="toggleUI()">
+        <svg id="eye-icon" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+
+    <header id="main-header" class="sticky top-0 z-[100] border-b border-gray-200 dark:border-gray-800 shadow-sm">
+        <div id="machines-container" class="machines-slider border-b border-gray-100 dark:border-gray-800"></div>
+        
+        <div id="header-collapsible" class="max-w-4xl mx-auto p-3 space-y-3">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-black dark:bg-white rounded-lg flex items-center justify-center text-white dark:text-black font-black text-xs">Y2</div>
+                    <h1 class="text-sm font-black">منتجات إختيارية</h1>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="toggleProductLanguage()" class="text-[10px] font-black px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800" id="lang-btn">EN</button>
+                    <button onclick="toggleDarkMode()" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 dark:bg-gray-800 text-gray-500">
+                        <svg id="moon-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+                        <svg id="sun-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 items-center">
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] opacity-70">البطاقة التعريفية</span>
+                    <input type="text" id="user-id" oninput="validateInput()" placeholder="#000" class="compact-input w-full px-3 text-center uppercase font-bold">
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-[10px] opacity-70">مستوى المنتجات</span>
+                    <div class="flex items-center gap-1">
+                        <input type="number" id="min-lvl" value="1" oninput="updateLevels()" class="compact-input w-full text-center">
+                        <span class="opacity-30">-</span>
+                        <input type="number" id="max-lvl" value="250" oninput="updateLevels()" class="compact-input w-full text-center">
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-end gap-2 w-full overflow-x-auto pb-1">
+                <div class="flex flex-col gap-1 flex-1 min-w-[120px]">
+                    <span class="text-[10px] opacity-70">البحث عن منتج</span>
+                    <input type="text" id="product-search" oninput="updateLevels()" placeholder="الاسم..." class="compact-input w-full px-3">
+                </div>
+                
+                <div class="flex flex-col gap-1 w-32 flex-shrink-0">
+                    <span class="text-[10px] opacity-70">الكمية المزاده</span>
+                    <div class="qty-step-control">
+                        <button class="qty-step-btn" onclick="adjustStep(-10)">-</button>
+                        <select id="step-qty" class="qty-step-select font-black">
+                            <option value="10">10</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="1000">1000</option>
+                            <option value="2000">2000</option>
+                            <option value="3000">3000</option>
+                            <option value="4000">4000</option>
+                            <option value="5000">5000</option>
+                        </select>
+                        <button class="qty-step-btn" onclick="adjustStep(10)">+</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1 w-24 flex-shrink-0">
+                    <span class="text-[10px] opacity-70">كمية المنتجات</span>
+                    <select id="target-qty" onchange="updateUI()" class="compact-input w-full px-1 font-black appearance-none cursor-pointer text-center">
+                        <option value="1000">1000</option>
+                        <option value="2000">2000</option>
+                        <option value="3000">3000</option>
+                        <option value="4000">4000</option>
+                        <option value="5000" selected>5000</option>
+                        <option value="10000">10000</option>
+                    </select>
+                </div>
+                
+                <button onclick="distributeEqually()" title="توزيع بالتساوي" class="w-10 h-[38px] bg-black dark:bg-white text-white dark:text-black rounded-lg flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h5v5c0 1.1.9 2 2 2h2c1.1 0 2-.9 2-2v-5h5c1.1 0 2-.9 2-2v-2a2 2 0 0 0-2-2h-5V4a2 2 0 0 0-2-2h-2z"/></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto p-3">
+        <div id="grid-container" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3"></div>
+    </main>
+
+    <footer id="main-footer" class="fixed bottom-0 left-0 right-0 z-[100] p-4 pb-8 border-t border-gray-200 dark:border-gray-800 shadow-2xl">
+        <div class="max-w-4xl mx-auto space-y-4">
+            <div class="flex justify-between items-center gap-4">
+                <div class="flex flex-col">
+                    <span class="text-[9px] font-black uppercase opacity-60">التقدم الحالي</span>
+                    <div class="flex items-baseline gap-1">
+                        <span id="current-total" class="text-2xl font-black leading-none">0</span>
+                        <span class="text-xs opacity-50">/ <span id="target-display">5000</span></span>
+                    </div>
+                </div>
+                <div class="progress-bar flex-1">
+                    <div id="progress-fill"></div>
+                </div>
+                <div class="text-left">
+                    <span class="text-[10px] font-black tracking-wider block">Y2RD STORE</span>
+                </div>
+            </div>
+
+            <div id="footer-collapsible" class="flex gap-2 w-full">
+                <button onclick="resetAll()" class="w-12 h-11 bg-gray-100 dark:bg-gray-800 rounded-xl flex items-center justify-center flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                </button>
+                <button id="view-list-btn" onclick="openPreview()" class="btn-disabled flex-1 h-11 bg-gray-100 dark:bg-gray-800 text-black dark:text-white rounded-xl font-black text-[11px]">عرض ملخص الطلب</button>
+                <button id="copy-code-btn" onclick="copyFinalCode()" class="btn-disabled flex-1 h-11 bg-slate-800 text-white font-black text-[11px] rounded-xl">نسخ الطلب</button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal -->
+    <div id="modal-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-md z-[300] hidden flex items-center justify-center p-4" onclick="closeModal()">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-sm rounded-3xl p-6 shadow-2xl flex flex-col max-h-[85vh]" onclick="event.stopPropagation()">
+            <div class="flex justify-between items-start mb-4">
+                <h2 class="text-lg font-black">ملخص الطلب</h2>
+                <div id="modal-badge-id" class="px-3 py-1 bg-gray-100 dark:bg-slate-800 rounded-full text-[10px] font-bold"></div>
+            </div>
+            
+            <div id="list-content" class="space-y-2 overflow-y-auto mb-4 pr-2 text-sm font-black text-right" dir="rtl"></div>
+
+            <div class="border-t dark:border-gray-800 pt-4 mt-2">
+                <div class="flex justify-between text-xs mb-1">
+                    <span class="opacity-60">عدد الأنواع:</span>
+                    <span id="product-count" class="font-black">0</span>
+                </div>
+                <div class="flex justify-between text-xs mb-3">
+                    <span class="opacity-60">إجمالي الكمية:</span>
+                    <span id="total-qty-modal" class="font-black">0</span>
+                </div>
+            </div>
+            
+            <button onclick="closeModal()" class="mt-2 w-full py-3 bg-black text-white dark:bg-white dark:text-black rounded-2xl font-black text-sm">إغلاق</button>
+        </div>
+    </div>
+
+    <script>
+        const machineTranslations = {
+            "Bakery": "المخبز", "Sugar Mill": "مطحنة السكر", "BBQ Grill": "شواية باربكيو",
+            "Dairy": "الألبان", "Pie Oven": "فرن الفطائر", "Popcorn Pot": "قدر الفشار",
+            "Loom": "النول", "Hat Maker": "صانع القبعات", "Cake Oven": "فرن الكيك",
+            "Juice Press": "عصارة", "Lure Workbench": "منصة الطعوم", "Ice Cream Maker": "صانع الآيس كريم",
+            "Smelter": "المصهّر", "Jam Maker": "صانع المربى", "Soup Kitchen": "مطبخ الحساء",
+            "Jeweler": "المجوهرات", "Honey Extractor": "عصارة العسل", "Coffee Kiosk": "كشك القهوة"
+        };
+
+        const productData = [
+            { n: "Cream", ar: "قشدة", l: 6, m: "Dairy" },
+            { n: "Butter", ar: "زبدة", l: 9, m: "Dairy" },
+            { n: "Bread", ar: "خبز", l: 2, m: "Bakery" },
+            { n: "Brown Sugar", ar: "سكر بني", l: 7, m: "Sugar Mill" },
+            { n: "Cheese", ar: "جبن", l: 12, m: "Dairy" },
+            { n: "White Sugar", ar: "سكر أبيض", l: 13, m: "Sugar Mill" },
+            { n: "Carrot Pie", ar: "فطيرة جزر", l: 14, m: "Pie Oven" },
+            { n: "Pumpkin Pie", ar: "فطيرة يقطين", l: 15, m: "Pie Oven" },
+            { n: "Butter Popcorn", ar: "فشار بالزبدة", l: 16, m: "Popcorn Pot" },
+            { n: "Sweater", ar: "سترة", l: 17, m: "Loom" },
+            { n: "Bacon Pie", ar: "فطيرة لحم مقدد", l: 18, m: "Pie Oven" },
+            { n: "Syrup", ar: "شراب السكر", l: 18, m: "Sugar Mill" },
+            { n: "Blue Woolly Hat", ar: "قبعة صوف زرقاء", l: 19, m: "Hat Maker" },
+            { n: "Cotton Shirt", ar: "قميص قطني", l: 19, m: "Loom" },
+            { n: "Carrot Cake", ar: "كيكة جزر", l: 21, m: "Cake Oven" },
+            { n: "Cheese Cake", ar: "تشيز كيك", l: 24, m: "Cake Oven" },
+            { n: "Carrot Juice", ar: "عصير جزر", l: 26, m: "Juice Press" },
+            { n: "Vanilla Ice Cream", ar: "آيس كريم فانيليا", l: 29, m: "Ice Cream Maker" },
+            { n: "Cherry Juice", ar: "عصير كرز", l: 30, m: "Juice Press" },
+            { n: "Apple Jam", ar: "مربى تفاح", l: 35, m: "Jam Maker" },
+            { n: "Bracelet", ar: "سوار", l: 38, m: "Jeweler" },
+            { n: "Necklace", ar: "قلادة", l: 39, m: "Jeweler" },
+            { n: "Honey", ar: "عسل", l: 39, m: "Honey Extractor" },
+            { n: "Espresso", ar: "إسبريسو", l: 42, m: "Coffee Kiosk" }
+        ];
+
+        let productLang = 'ar', selection = {}, uiVisible = true, currentMachineFilter = 'all';
+
+        const products = productData.map((e, i) => ({
+            id: `prod_${i}`,
+            name: e.n,
+            nameAr: e.ar,
+            img: `https://hayday.fandom.com/wiki/Special:FilePath/${e.n.replace(/ /g, '_')}.png`,
+            lvl: e.l,
+            machine: e.m
+        }));
+
+        function generateMachineFilters() {
+            const container = document.getElementById('machines-container');
+            container.innerHTML = "";
+            const allBtn = document.createElement('button');
+            allBtn.className = `machine-filter-btn ${currentMachineFilter === 'all' ? 'active' : ''}`;
+            allBtn.innerText = "الكل";
+            allBtn.onclick = () => filterByMachine('all');
+            container.appendChild(allBtn);
+
+            [...new Set(products.map(p => p.machine))].sort().forEach(m => {
+                const btn = document.createElement('button');
+                btn.className = `machine-filter-btn ${currentMachineFilter === m ? 'active' : ''}`;
+                btn.innerText = machineTranslations[m] || m;
+                btn.onclick = () => filterByMachine(m);
+                container.appendChild(btn);
+            });
+        }
+
+        function init() {
+            generateMachineFilters();
+            const grid = document.getElementById('grid-container');
+            grid.innerHTML = "";
+            products.forEach(p => {
+                selection[p.id] = 0;
+                grid.innerHTML += `
+                    <div class="machine-card p-3 flex flex-col items-center product-row" data-lvl="${p.lvl}" data-machine="${p.machine}" data-name-ar="${p.nameAr}" data-name-en="${p.name}" id="row-${p.id}">
+                        <div class="product-img-container">
+                            <img src="${p.img}" class="product-img" loading="lazy">
+                        </div>
+                        <span class="text-[10px] font-black line-clamp-1 product-display-name text-center mb-2" data-id="${p.id}">${p.nameAr}</span>
+                        <div class="flex items-center gap-1 bg-gray-50 dark:bg-slate-800 p-1.5 rounded-xl w-full justify-between border dark:border-gray-700">
+                            <button onclick="changeQty('${p.id}', -1)" class="w-7 h-7 flex items-center justify-center font-black text-sm">-</button>
+                            <span id="qty-${p.id}" class="text-xs font-black">0</span>
+                            <button onclick="changeQty('${p.id}', 1)" class="w-7 h-7 flex items-center justify-center font-black text-sm">+</button>
+                        </div>
+                    </div>`;
+            });
+            updateLevels();
+            updateUI();
+        }
+
+        function adjustStep(val) {
+            const input = document.getElementById('step-qty');
+            let nextVal = parseInt(input.value) + val;
+            if (nextVal < 10) nextVal = 10;
+            input.value = nextVal;
+        }
+
+        function toggleUI() {
+            uiVisible = !uiVisible;
+            document.getElementById('header-collapsible').classList.toggle('ui-hide-content', !uiVisible);
+            document.getElementById('footer-collapsible').classList.toggle('ui-hide-content', !uiVisible);
+            document.getElementById('eye-icon').style.opacity = uiVisible ? "1" : "0.5";
+        }
+
+        function toggleProductLanguage() {
+            productLang = productLang === 'ar' ? 'en' : 'ar';
+            document.getElementById('lang-btn').innerText = productLang === 'ar' ? 'EN' : 'AR';
+            document.querySelectorAll('.product-display-name').forEach(el => {
+                const id = el.getAttribute('data-id');
+                const p = products.find(x => x.id === id);
+                el.innerText = productLang === 'ar' ? p.nameAr : p.name;
+            });
+        }
+
+        function filterByMachine(m) {
+            currentMachineFilter = m;
+            generateMachineFilters();
+            updateLevels();
+        }
+
+        function updateLevels() {
+            const min = parseInt(document.getElementById('min-lvl').value) || 1;
+            const max = parseInt(document.getElementById('max-lvl').value) || 250;
+            const search = document.getElementById('product-search').value.toLowerCase();
+            const machine = currentMachineFilter;
+
+            document.querySelectorAll('.product-row').forEach(row => {
+                const lvl = parseInt(row.getAttribute('data-lvl'));
+                const m = row.getAttribute('data-machine');
+                const nameAr = row.getAttribute('data-name-ar').toLowerCase();
+                const nameEn = row.getAttribute('data-name-en').toLowerCase();
+                
+                const matchesSearch = search === "" || nameAr.includes(search) || nameEn.includes(search);
+                const matchesMachine = machine === 'all' || m === machine;
+                const matchesLvl = lvl >= min && lvl <= max;
+
+                row.classList.toggle('row-hidden', !(matchesLvl && matchesMachine && matchesSearch));
+            });
+        }
+
+        function changeQty(id, dir) {
+            const step = parseInt(document.getElementById('step-qty').value) || 10;
+            const delta = dir * step;
+            const currentTotal = Object.values(selection).reduce((a, b) => a + b, 0);
+            const target = parseInt(document.getElementById('target-qty').value);
+
+            if (delta > 0 && currentTotal + delta > target) return;
+            
+            selection[id] = Math.max(0, selection[id] + delta);
+            document.getElementById(`qty-${id}`).innerText = selection[id];
+            updateUI();
+        }
+
+        function updateUI() {
+            const total = Object.values(selection).reduce((a, b) => a + b, 0);
+            const target = parseInt(document.getElementById('target-qty').value);
+            document.getElementById('current-total').innerText = total.toLocaleString();
+            document.getElementById('target-display').innerText = target.toLocaleString();
+            document.getElementById('progress-fill').style.width = Math.min(100, (total / target) * 100) + "%";
+            validateInput();
+        }
+
+        function distributeEqually() {
+            const target = parseInt(document.getElementById('target-qty').value);
+            const visibleRows = Array.from(document.querySelectorAll('.product-row:not(.row-hidden)'));
+            if (!visibleRows.length) return;
+
+            resetAll();
+            const perItem = 10 * Math.floor(target / (10 * visibleRows.length));
+            const remainder = Math.floor((target - (perItem * visibleRows.length)) / 10);
+
+            visibleRows.forEach((row, i) => {
+                const id = row.id.replace('row-', '');
+                selection[id] = perItem + (i < remainder ? 10 : 0);
+                document.getElementById(`qty-${id}`).innerText = selection[id];
+            });
+            updateUI();
+        }
+
+        function resetAll() {
+            for (let id in selection) {
+                selection[id] = 0;
+                const el = document.getElementById(`qty-${id}`);
+                if (el) el.innerText = "0";
+            }
+            updateUI();
+        }
+
+        function validateInput() {
+            const hasId = document.getElementById('user-id').value.trim().length >= 1;
+            document.getElementById('view-list-btn').classList.toggle('btn-disabled', !hasId);
+            document.getElementById('copy-code-btn').classList.toggle('btn-disabled', !hasId);
+        }
+
+        function openPreview() {
+            const content = document.getElementById('list-content');
+            let count = 0, total = 0;
+            content.innerHTML = "";
+            for (let id in selection) {
+                if (selection[id] > 0) {
+                    count++; total += selection[id];
+                    const p = products.find(x => x.id === id);
+                    content.innerHTML += `
+                        <div class="flex justify-between items-center py-2 border-b dark:border-gray-800">
+                            <span class="font-black text-xs">${productLang === 'ar' ? p.nameAr : p.name}</span>
+                            <span class="font-black bg-gray-100 dark:bg-slate-800 px-3 py-1 rounded-lg text-xs">x${selection[id]}</span>
+                        </div>`;
+                }
+            }
+            document.getElementById('modal-badge-id').innerText = document.getElementById('user-id').value.toUpperCase() || "#ID";
+            document.getElementById('product-count').innerText = count;
+            document.getElementById('total-qty-modal').innerText = total.toLocaleString();
+            document.getElementById('modal-overlay').classList.remove('hidden');
+        }
+
+        function closeModal() { document.getElementById('modal-overlay').classList.add('hidden'); }
+
+        function copyFinalCode() {
+            const idVal = document.getElementById('user-id').value.toUpperCase();
+            let text = "", totalQty = 0;
+            for (let id in selection) {
+                if (selection[id] > 0) {
+                    const p = products.find(x => x.id === id);
+                    text += `${p.name}=${selection[id]}\n`;
+                    totalQty += selection[id];
+                }
+            }
+            text += `\n${idVal}\n${totalQty}`;
+            copyToClipboard(text, 'copy-code-btn');
+        }
+
+        function copyToClipboard(text, btnId) {
+            const btn = document.getElementById(btnId);
+            const old = btn.innerText;
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el); el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            btn.innerText = "تم النسخ ✓";
+            setTimeout(() => btn.innerText = old, 2000);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDark = document.body.classList.contains('dark-mode');
+            document.getElementById('moon-icon').classList.toggle('hidden', isDark);
+            document.getElementById('sun-icon').classList.toggle('hidden', !isDark);
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
+
